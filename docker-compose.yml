@@ -1,0 +1,46 @@
+version: "3"
+services:
+  nginx:
+    image: nginx:1.15.8
+    depends_on:
+      - php
+    ports:
+      - 80:80
+    volumes:
+      - ./config:/etc/nginx/conf.d:ro # nginx配置文件
+      - ./application:/application
+    networks:
+      - compose-net
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: Dockerfile-php
+    volumes:
+      - ./application:/application
+    networks:
+      - compose-net
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=there
+    networks:
+      - compose-net
+  redis:
+    image: redis:5.0
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - compose-net
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=mysql
+      - PMA_ROOT_PASSWORD=there
+    networks:
+      - compose-net
+networks:
+  compose-net:
